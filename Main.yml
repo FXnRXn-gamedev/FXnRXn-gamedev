@@ -5,7 +5,7 @@ name: Generate Snake
 on:
   schedule:
       # every 12 hours
-    - cron: "0 */24 * * *"
+    - cron: "0 */12 * * *"
 
   # This command allows us to run the Action automatically from the Actions tab.
   workflow_dispatch:
@@ -41,8 +41,8 @@ jobs:
           gif_duration: 80
           color_snake: "#ff6b6b"
           color_dots: "#adbac7,#6cb6ff,#316dca,#255ab2,#1b4b91"
-          start_date: "01.01.2023"
-          end_date: ""
+          start_date: "2021"
+          end_date: "2025"
           layout: classic
           with_head: true
           with_tail: true
