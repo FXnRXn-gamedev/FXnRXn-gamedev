@@ -1,89 +1,64 @@
+# GitHub Action for generating a contribution graph with a snake eating your contributions.
 name: Generate Snake
 
+# Controls when the action will run.
 on:
   schedule:
-    - cron: "0 */6 * * *"  # Runs every 6 hours for more frequent updates
+      # every 12 hours
+    - cron: "0 */1 * * *"
+
+  # This command allows us to run the Action automatically from the Actions tab.
   workflow_dispatch:
+  
+  # Also run on every push on the master branch
   push:
-    branches: [ main ]
+    branches:
+    - main
 
+# The sequence of runs in this workflow:
 jobs:
+  # This workflow contains a single job called "build"
   build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Get full commit history for stats
 
-      - name: Generate snake visualization
-        uses: Platane/snk@master
-        id: snake-gen
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+    
+      - name: Generate the snake files in './dist/'
+        uses: Platane/snk@v3
+        id: snake-gif
         with:
           github_user_name: ${{ github.repository_owner }}
           outputs: |
-            dist/snake.svg
-            dist/snake.gif
-            dist/snake-dark.svg
-            dist/snake-vertical.svg
-            dist/snake-3d.gif?angle=30
-            dist/snake-calendar.png?calendar=true
-          # Advanced customization
-          gif_frames_per_step: 8
-          gif_duration: 65
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+            dist/github-contribution-grid-snake.gif?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9
+            # Customization parameters
+          gif_frames_per_step: 6
+          gif_duration: 80
           color_snake: "#ff6b6b"
-          snake_color_gradient: true
-          snake_head_shape: "round"
-          snake_tail_shape: "pointed"
-          snake_segments: 15
-          dot_size: 4
-          circle_radius: 5
-          palette: github
-          start_date: ""  # All-time contributions
-          end_date: ""    # Up to today
+          color_dots: "#adbac7,#6cb6ff,#316dca,#255ab2,#1b4b91"
+          start_date: ""
+          end_date: ""
           layout: classic
           with_head: true
           with_tail: true
-          with_glow: true
-          glow_radius: 8
-          with_animation: true
-          animation_speed: 1.5
-          with_eyes: true
-          with_tongue: true
-          with_grid: true
-          grid_color: "#444444"
-          gif_reverse: true
-          gif_loop_count: 0  # Infinite loop
+          circle_radius: 4
+          dot_size: 3.5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate statistics report
-        run: |
-          echo "## Contribution Statistics" > dist/stats.md
-          echo "- $(date +'%Y-%m-%d %H:%M')" >> dist/stats.md
-          echo "![Snake Animation](snake.gif)" >> dist/stats.md
-          curl -s "https://github-contributions.vercel.app/api/v1/${{ github.repository_owner }}?format=json" | jq -r '
-            "Total Contributions: \(.total.contributions)",
-            "Longest Streak: \(.streaks.longest.days) days (\(.streaks.longest.start} to \(.streaks.longest.end}))",
-            "Current Streak: \(.streaks.current.days) days",
-            "Daily Average: \(.averages.daily)",
-            "Most Productive Day: \(.mostProductive.day) (\(.mostProductive.count) contributions)"
-          ' >> dist/stats.md
+      - name: Show build status
+        run: git status
 
-      - name: Add repository metrics
-        run: |
-          echo "" >> dist/stats.md
-          echo "### Repository Metrics" >> dist/stats.md
-          echo "- Stars: $(curl -s https://api.github.com/repos/${{ github.repository }} | jq '.stargazers_count')" >> dist/stats.md
-          echo "- Forks: $(curl -s https://api.github.com/repos/${{ github.repository }} | jq '.forks_count')" >> dist/stats.md
-          echo "- Open Issues: $(curl -s https://api.github.com/repos/${{ github.repository }} | jq '.open_issues_count')" >> dist/stats.md
-
-      - name: Push generated files
+      - name: Push new files to the output branch
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
           target_branch: output
           build_dir: dist
-          commit_message: "🐍 Updated snake - $(date +'%Y-%m-%d %H:%M')"
-          force_orphan: true  # Keep branch history clean
+          commit_message: Update snake animations
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
