@@ -41,7 +41,7 @@ jobs:
           gif_duration: 80
           color_snake: "#ff6b6b"
           color_dots: "#adbac7,#6cb6ff,#316dca,#255ab2,#1b4b91"
-          start_date: ""
+          start_date: "01.01.2023"
           end_date: ""
           layout: classic
           with_head: true
